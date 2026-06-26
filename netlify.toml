@@ -1,0 +1,5 @@
+# Netlify: перетащите папку seeting в app.netlify.com/drop
+# или подключите репозиторий — публикация из корня проекта
+
+[build]
+  publish = "."

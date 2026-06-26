@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Рассадка гостей на свадьбе Кирилла и Анны — 10.07.2026">
+  <meta name="theme-color" content="#faf7f2">
+  <title>Кирилл &amp; Анна — Рассадка</title>
+  <link rel="preload" href="styles.css" as="style">
+  <link rel="preload" href="guests.json" as="fetch" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💍</text></svg>">
+</head>
+<body>
+  <div class="petals" id="petals" aria-hidden="true"></div>
+  <div class="bg-gradient" aria-hidden="true"></div>
+
+  <div class="decor decor--tl" aria-hidden="true">
+    <svg viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M60 10 C40 40 20 80 30 120 C35 140 50 150 60 155 C70 150 85 140 90 120 C100 80 80 40 60 10Z" fill="rgba(180,210,190,0.22)"/>
+      <path d="M60 30 L45 70 M60 30 L75 65 M60 50 L35 90 M60 50 L85 85" stroke="rgba(160,195,170,0.35)" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="decor decor--br" aria-hidden="true">
+    <svg viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M60 10 C40 40 20 80 30 120 C35 140 50 150 60 155 C70 150 85 140 90 120 C100 80 80 40 60 10Z" fill="rgba(245,200,210,0.18)"/>
+      <path d="M60 30 L45 70 M60 30 L75 65 M60 50 L35 90 M60 50 L85 85" stroke="rgba(201,168,124,0.28)" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div id="app-loader" class="app-loader">
+    <div class="app-loader__ring" aria-hidden="true"></div>
+    <p class="app-loader__text">Кирилл <span class="app-loader__amp">&amp;</span> Анна</p>
+  </div>
+
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
+  <div id="guest-reveal" class="guest-reveal" hidden>
+    <div class="guest-reveal__inner glass">
+      <p class="guest-reveal__label">Добро пожаловать</p>
+      <h2 class="guest-reveal__name" id="reveal-name"></h2>
+      <p class="guest-reveal__sub">Рады видеть вас на нашей свадьбе</p>
+      <div class="guest-reveal__line" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <div class="app" id="app-main" role="main">
+    <!-- Приветствие -->
+    <section id="screen-welcome" class="screen screen--active">
+      <div class="welcome">
+        <div class="welcome__ornament" aria-hidden="true">
+          <span class="welcome__ornament-line"></span>
+          <span class="welcome__ornament-heart">♥</span>
+          <span class="welcome__ornament-line"></span>
+        </div>
+        <div class="welcome__sparkle welcome__sparkle--1" aria-hidden="true">✦</div>
+        <div class="welcome__sparkle welcome__sparkle--2" aria-hidden="true">✧</div>
+        <div class="welcome__sparkle welcome__sparkle--3" aria-hidden="true">✦</div>
+
+        <p class="welcome__label">Мы женимся</p>
+        <h1 class="welcome__names">
+          Кирилл <span class="welcome__amp">&amp;</span> Анна
+        </h1>
+        <p class="welcome__date">
+          <span>10</span>
+          <span class="welcome__dot">·</span>
+          <span>07</span>
+          <span class="welcome__dot">·</span>
+          <span>2026</span>
+        </p>
+        <p class="welcome__greeting">
+          Дорогие гости, мы рады разделить с вами этот день.
+          Найдите своё место на схеме зала.
+        </p>
+        <button type="button" id="btn-start" class="btn-primary">
+          <span>Открыть схему рассадки</span>
+          <span class="btn-primary__arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Схема + поиск (единый экран) -->
+    <section id="screen-map" class="screen screen--map">
+      <div class="map-top">
+        <div class="screen-header screen-header--map">
+          <button type="button" id="btn-back-welcome" class="btn-icon" aria-label="Назад">
+            ←
+          </button>
+          <h2 class="screen-header__title">Рассадка гостей</h2>
+          <div class="screen-header__spacer"></div>
+        </div>
+
+        <div class="search-block glass search-block--compact">
+          <label for="guest-search" class="search-block__label">Найдите себя на схеме</label>
+          <div class="search-wrap">
+            <span class="search-wrap__icon" aria-hidden="true">⌕</span>
+            <input
+              type="search"
+              id="guest-search"
+              class="search-input"
+              placeholder="Имя, фамилия или сокращение"
+              autocomplete="off"
+              enterkeyhint="search"
+            >
+          </div>
+          <ul id="suggestions" class="suggestions" role="listbox" aria-label="Подсказки"></ul>
+        </div>
+      </div>
+
+      <div class="screen-body screen-body--map">
+        <div id="search-empty" class="search-empty" hidden>
+          <p class="search-empty__title">Гость не найден</p>
+          <p class="search-empty__text">Попробуйте имя, фамилию или уменьшительную форму</p>
+        </div>
+
+        <div id="guest-card" class="seat-banner" hidden>
+          <div class="seat-banner__guest">
+            <div class="seat-banner__avatar" id="guest-avatar"></div>
+            <div class="seat-banner__info">
+              <p class="seat-banner__greeting" id="guest-greeting"></p>
+              <h3 class="seat-banner__name" id="guest-name"></h3>
+            </div>
+          </div>
+          <div class="seat-banner__numbers">
+            <div class="seat-banner__slot">
+              <span class="seat-banner__label">Стол</span>
+              <span class="seat-banner__value" id="guest-table"></span>
+            </div>
+            <div class="seat-banner__divider" aria-hidden="true"></div>
+            <div class="seat-banner__slot">
+              <span class="seat-banner__label">Место</span>
+              <span class="seat-banner__value" id="guest-seat"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="map-scene">
+          <article class="map-invitation">
+            <header class="map-invitation__header">
+              <h2 class="map-invitation__title">Схема зала</h2>
+              <p class="map-invitation__subtitle">Нажмите на стол, чтобы увидеть гостей</p>
+              <div class="map-invitation__divider" aria-hidden="true"></div>
+            </header>
+            <div id="hall-map" class="hall-map" role="application" aria-label="Интерактивная схема рассадки"></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Админка -->
+    <section id="screen-admin-login" class="screen">
+      <div class="screen-header">
+        <button type="button" id="btn-admin-login-back" class="btn-icon" aria-label="Назад">←</button>
+        <h2 class="screen-header__title">Организатор</h2>
+        <div class="screen-header__spacer"></div>
+      </div>
+      <div class="screen-body">
+        <div class="admin-login glass">
+          <p class="admin-login__hint">Введите пароль для редактирования рассадки</p>
+          <input type="password" id="admin-pin" class="search-input admin-pin-input" placeholder="Пароль" autocomplete="off">
+          <p id="admin-login-error" class="admin-error" hidden></p>
+          <button type="button" id="btn-admin-login" class="btn-primary admin-login__btn">Войти</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-admin" class="screen">
+      <div class="screen-header">
+        <button type="button" id="btn-admin-back" class="btn-icon" aria-label="Назад">←</button>
+        <h2 class="screen-header__title">Рассадка</h2>
+        <button type="button" id="btn-admin-logout" class="btn-icon btn-icon--text" aria-label="Выйти">⎋</button>
+      </div>
+      <div class="screen-body admin-body">
+        <div class="admin-stats glass" id="admin-stats"></div>
+        <div class="admin-toolbar">
+          <button type="button" id="btn-add-guest" class="btn-secondary btn-secondary--sm">+ Гость</button>
+          <button type="button" id="btn-export-config" class="btn-secondary btn-secondary--sm">Для config.js</button>
+          <button type="button" id="btn-export" class="btn-secondary btn-secondary--sm">Экспорт JSON</button>
+          <label class="btn-secondary btn-secondary--sm admin-import-label">
+            Импорт
+            <input type="file" id="btn-import" accept=".json" hidden>
+          </label>
+        </div>
+        <div class="admin-filter">
+          <label for="admin-filter-table" class="visually-hidden">Фильтр по столу</label>
+          <select id="admin-filter-table" class="admin-select"></select>
+        </div>
+        <div id="admin-guest-list" class="admin-guest-list"></div>
+        <p class="admin-note">
+          После правок нажмите «Экспорт JSON», загрузите <code>guests.json</code> на хостинг
+          (рядом с <code>index.html</code>) — тогда все гости увидят обновления.
+        </p>
+      </div>
+    </section>
+
+    <div id="guest-form-modal" class="modal" hidden>
+      <div class="modal__backdrop" id="guest-form-backdrop"></div>
+      <div class="modal__sheet glass" role="dialog" aria-labelledby="guest-form-title">
+        <div class="modal__handle" aria-hidden="true"></div>
+        <h3 id="guest-form-title" class="modal__title">Гость</h3>
+        <form id="guest-form" class="guest-form">
+          <input type="hidden" id="guest-form-id">
+          <label class="guest-form__label">
+            Имя и фамилия
+            <input type="text" id="guest-form-name" class="search-input" required placeholder="Иван Иванов">
+          </label>
+          <div class="guest-form__row">
+            <label class="guest-form__label">
+              Стол
+              <select id="guest-form-table" class="admin-select" required></select>
+            </label>
+            <label class="guest-form__label">
+              Место
+              <select id="guest-form-seat" class="admin-select" required></select>
+            </label>
+          </div>
+          <label class="guest-form__label">
+            Сокращения (через запятую)
+            <input type="text" id="guest-form-aliases" class="search-input" placeholder="Саша, Шура">
+          </label>
+          <div class="guest-form__actions">
+            <button type="button" id="guest-form-delete" class="btn-danger" hidden>Удалить</button>
+            <button type="submit" class="btn-primary guest-form__save">Сохранить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="table-modal" class="modal" hidden>
+      <div class="modal__backdrop" id="modal-backdrop"></div>
+      <div class="modal__sheet glass" role="dialog" aria-labelledby="modal-title">
+        <div class="modal__handle" aria-hidden="true"></div>
+        <h3 id="modal-title" class="modal__title"></h3>
+        <div id="modal-scene" class="modal-scene"></div>
+        <button type="button" id="modal-close" class="btn-secondary btn-secondary--full">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js" defer></script>
+  <script src="data.js" defer></script>
+  <script src="script.js" defer></script>
+</body>
+</html>
