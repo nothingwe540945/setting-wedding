@@ -2,7 +2,7 @@
  * Основное приложение: экраны, поиск, схема зала, анимации.
  */
 let selectedGuest = null;
-let currentScreen = 'welcome';
+let currentScreen = "welcome";
 let isTransitioning = false;
 let revealTimeout = null;
 let searchDebounceTimer = null;
@@ -12,37 +12,36 @@ let hallMapRendered = false;
 let petalsCreated = false;
 
 const screens = {
-  welcome: document.getElementById('screen-welcome'),
-  map: document.getElementById('screen-map'),
-  adminLogin: document.getElementById('screen-admin-login'),
-  admin: document.getElementById('screen-admin'),
+  welcome: document.getElementById("screen-welcome"),
+  map: document.getElementById("screen-map"),
+  adminLogin: document.getElementById("screen-admin-login"),
+  admin: document.getElementById("screen-admin"),
 };
-const appLoader = document.getElementById('app-loader');
-const guestReveal = document.getElementById('guest-reveal');
-const revealName = document.getElementById('reveal-name');
-const confettiEl = document.getElementById('confetti');
-const btnStart = document.getElementById('btn-start');
-const btnBackWelcome = document.getElementById('btn-back-welcome');
-const searchInput = document.getElementById('guest-search');
-const suggestionsEl = document.getElementById('suggestions');
-const guestCard = document.getElementById('guest-card');
-const searchEmpty = document.getElementById('search-empty');
-const hallMap = document.getElementById('hall-map');
-const tableModal = document.getElementById('table-modal');
-const modalBackdrop = document.getElementById('modal-backdrop');
-const modalClose = document.getElementById('modal-close');
-const modalTitle = document.getElementById('modal-title');
-const modalScene = document.getElementById('modal-scene');
-const petalsContainer = document.getElementById('petals');
-const guestFormModal = document.getElementById('guest-form-modal');
+const appLoader = document.getElementById("app-loader");
+const guestReveal = document.getElementById("guest-reveal");
+const revealName = document.getElementById("reveal-name");
+const confettiEl = document.getElementById("confetti");
+const btnStart = document.getElementById("btn-start");
+const btnBackWelcome = document.getElementById("btn-back-welcome");
+const searchInput = document.getElementById("guest-search");
+const suggestionsEl = document.getElementById("suggestions");
+const guestCard = document.getElementById("guest-card");
+const searchEmpty = document.getElementById("search-empty");
+const hallMap = document.getElementById("hall-map");
+const tableModal = document.getElementById("table-modal");
+const modalBackdrop = document.getElementById("modal-backdrop");
+const modalClose = document.getElementById("modal-close");
+const modalTitle = document.getElementById("modal-title");
+const modalScene = document.getElementById("modal-scene");
+const petalsContainer = document.getElementById("petals");
+const guestFormModal = document.getElementById("guest-form-modal");
 
 const TABLE_LAYOUT = {
   head: { cx: 180, cy: 34 },
-  1: { cx: 180, cy: 118 },
-  2: { cx: 76, cy: 286 },
-  3: { cx: 284, cy: 286 },
-  4: { cx: 64, cy: 454 },
-  5: { cx: 296, cy: 454 },
+  1: { cx: 76, cy: 180 },
+  2: { cx: 284, cy: 180 },
+  3: { cx: 76, cy: 380 },
+  4: { cx: 284, cy: 380 },
 };
 
 const TABLE_RADIUS = 32;
@@ -50,21 +49,21 @@ const CHAIR_ORBIT = 46;
 const CHAIR_RADIUS = 6;
 
 function normalize(str) {
-  return str.trim().toLowerCase().replace(/\s+/g, ' ').replace(/ё/g, 'е');
+  return str.trim().toLowerCase().replace(/\s+/g, " ").replace(/ё/g, "е");
 }
 
 function splitName(fullName) {
   const parts = fullName.trim().split(/\s+/);
-  return { first: parts[0] || '', last: parts.slice(1).join(' ') || '' };
+  return { first: parts[0] || "", last: parts.slice(1).join(" ") || "" };
 }
 
 function getInitials(name) {
   const { first, last } = splitName(name);
-  return ((first[0] || '') + (last[0] || '')).toUpperCase();
+  return ((first[0] || "") + (last[0] || "")).toUpperCase();
 }
 
 function escapeHtml(str) {
-  const d = document.createElement('div');
+  const d = document.createElement("div");
   d.textContent = str;
   return d.innerHTML;
 }
@@ -84,7 +83,7 @@ function groupByTable() {
 function updateBodyScroll() {
   const modalOpen = !tableModal.hidden || !guestFormModal.hidden;
   const revealOpen = !guestReveal.hidden;
-  document.body.style.overflow = (modalOpen || revealOpen) ? 'hidden' : '';
+  document.body.style.overflow = modalOpen || revealOpen ? "hidden" : "";
 }
 
 function haptic(pattern = 12) {
@@ -92,27 +91,29 @@ function haptic(pattern = 12) {
 }
 
 function prefersReducedMotion() {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 function hideLoader() {
-  appLoader.classList.add('app-loader--hidden');
+  appLoader.classList.add("app-loader--hidden");
 }
 
 function spawnConfetti() {
   if (prefersReducedMotion()) return;
-  const colors = ['#f5d5d8', '#e8d4b0', '#d4e8d9', '#e0d8f0', '#c9a87c'];
+  const colors = ["#f5d5d8", "#e8d4b0", "#d4e8d9", "#e0d8f0", "#c9a87c"];
   const frag = document.createDocumentFragment();
   for (let i = 0; i < 18; i++) {
-    const piece = document.createElement('span');
-    piece.className = 'confetti__piece';
+    const piece = document.createElement("span");
+    piece.className = "confetti__piece";
     piece.style.left = `${15 + Math.random() * 70}%`;
     piece.style.background = colors[i % colors.length];
     piece.style.animationDelay = `${Math.random() * 0.35}s`;
     frag.appendChild(piece);
   }
   confettiEl.replaceChildren(frag);
-  setTimeout(() => { confettiEl.replaceChildren(); }, 2200);
+  setTimeout(() => {
+    confettiEl.replaceChildren();
+  }, 2200);
 }
 
 function searchGuests(query) {
@@ -121,7 +122,7 @@ function searchGuests(query) {
 
   return GUESTS.filter((guest) => {
     const name = normalize(guest.name);
-    const parts = name.split(' ');
+    const parts = name.split(" ");
     if (name.includes(q)) return true;
     if (parts.some((p) => p.startsWith(q))) return true;
     return (guest.aliases || []).some((alias) => {
@@ -136,12 +137,13 @@ function renderSuggestions(results) {
   suggestionFocusIndex = -1;
 
   if (!results.length) {
-    suggestionsEl.innerHTML = '';
+    suggestionsEl.innerHTML = "";
     return;
   }
 
   suggestionsEl.innerHTML = results
-    .map((guest, i) => `
+    .map(
+      (guest, i) => `
       <li class="suggestion" role="option" tabindex="-1" id="suggestion-${i}" aria-selected="false">
         <div class="suggestion__avatar">${escapeHtml(getInitials(guest.name))}</div>
         <div class="suggestion__info">
@@ -149,26 +151,27 @@ function renderSuggestions(results) {
           <div class="suggestion__meta">Стол ${guest.table} · Место ${guest.seat}</div>
         </div>
       </li>
-    `)
-    .join('');
+    `,
+    )
+    .join("");
 
-  suggestionsEl.querySelectorAll('.suggestion').forEach((el, i) => {
+  suggestionsEl.querySelectorAll(".suggestion").forEach((el, i) => {
     el.style.animationDelay = `${i * 0.04}s`;
-    el.addEventListener('click', () => selectGuest(results[i]));
+    el.addEventListener("click", () => selectGuest(results[i]));
   });
 
   previewGuestOnMap(results[0]);
 }
 
 function setSuggestionFocus(index) {
-  const items = suggestionsEl.querySelectorAll('.suggestion');
+  const items = suggestionsEl.querySelectorAll(".suggestion");
   if (!items.length) return;
 
   suggestionFocusIndex = Math.max(0, Math.min(index, items.length - 1));
   items.forEach((el, i) => {
     const focused = i === suggestionFocusIndex;
-    el.classList.toggle('suggestion--focused', focused);
-    el.setAttribute('aria-selected', focused ? 'true' : 'false');
+    el.classList.toggle("suggestion--focused", focused);
+    el.setAttribute("aria-selected", focused ? "true" : "false");
     if (focused) {
       el.focus();
       previewGuestOnMap(lastSearchResults[i]);
@@ -178,9 +181,9 @@ function setSuggestionFocus(index) {
 
 function clearSuggestionFocus() {
   suggestionFocusIndex = -1;
-  suggestionsEl.querySelectorAll('.suggestion').forEach((el) => {
-    el.classList.remove('suggestion--focused');
-    el.setAttribute('aria-selected', 'false');
+  suggestionsEl.querySelectorAll(".suggestion").forEach((el) => {
+    el.classList.remove("suggestion--focused");
+    el.setAttribute("aria-selected", "false");
   });
 }
 
@@ -191,24 +194,24 @@ function previewGuestOnMap(guest) {
 }
 
 function showGuestCard(guest) {
-  document.getElementById('guest-avatar').textContent = getInitials(guest.name);
-  document.getElementById('guest-greeting').textContent = getRandomGreeting();
-  document.getElementById('guest-name').textContent = guest.name;
-  document.getElementById('guest-table').textContent = guest.table;
-  document.getElementById('guest-seat').textContent = guest.seat;
+  document.getElementById("guest-avatar").textContent = getInitials(guest.name);
+  document.getElementById("guest-greeting").textContent = getRandomGreeting();
+  document.getElementById("guest-name").textContent = guest.name;
+  document.getElementById("guest-table").textContent = guest.table;
+  document.getElementById("guest-seat").textContent = guest.seat;
 
   guestCard.hidden = false;
-  guestCard.classList.remove('seat-banner--appear');
+  guestCard.classList.remove("seat-banner--appear");
   void guestCard.offsetWidth;
-  guestCard.classList.add('seat-banner--appear');
+  guestCard.classList.add("seat-banner--appear");
 
   ensureHallMap();
   playGuestMapReveal(guest, false);
 
   requestAnimationFrame(() => {
     guestCard.scrollIntoView({
-      behavior: prefersReducedMotion() ? 'auto' : 'smooth',
-      block: 'start',
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+      block: "start",
     });
   });
 
@@ -218,7 +221,7 @@ function showGuestCard(guest) {
 
 function selectGuest(guest) {
   selectedGuest = guest;
-  suggestionsEl.innerHTML = '';
+  suggestionsEl.innerHTML = "";
   lastSearchResults = [];
   searchInput.value = guest.name;
   searchEmpty.hidden = true;
@@ -250,7 +253,7 @@ function runSearch() {
   const query = searchInput.value.trim();
 
   if (!query) {
-    suggestionsEl.innerHTML = '';
+    suggestionsEl.innerHTML = "";
     lastSearchResults = [];
     suggestionFocusIndex = -1;
     guestCard.hidden = true;
@@ -264,7 +267,7 @@ function runSearch() {
   const results = searchGuests(query);
 
   if (results.length === 0) {
-    suggestionsEl.innerHTML = '';
+    suggestionsEl.innerHTML = "";
     lastSearchResults = [];
     suggestionFocusIndex = -1;
     guestCard.hidden = true;
@@ -297,58 +300,105 @@ function showScreen(name) {
   const animate = !prefersReducedMotion();
 
   if (prev) {
-    prev.classList.remove('screen--active');
-    if (animate) prev.classList.add('screen--leaving');
-    else prev.classList.remove('screen--leaving');
+    prev.classList.remove("screen--active");
+    if (animate) prev.classList.add("screen--leaving");
+    else prev.classList.remove("screen--leaving");
   }
 
-  next.classList.add('screen--active');
+  next.classList.add("screen--active");
   if (animate) {
-    next.classList.add('screen--entering');
+    next.classList.add("screen--entering");
   } else {
-    next.classList.remove('screen--entering');
+    next.classList.remove("screen--entering");
   }
 
   const finishMs = animate ? 320 : 0;
   setTimeout(() => {
-    if (prev) prev.classList.remove('screen--leaving');
-    next.classList.remove('screen--entering');
+    if (prev) prev.classList.remove("screen--leaving");
+    next.classList.remove("screen--entering");
     isTransitioning = false;
   }, finishMs);
 
   currentScreen = name;
 
-  if (name === 'map') {
+  if (name === "map") {
     ensureHallMap();
     if (selectedGuest) playGuestMapReveal(selectedGuest, false);
     setTimeout(() => {
-      try { searchInput.focus({ preventScroll: true }); } catch (_) {}
+      try {
+        searchInput.focus({ preventScroll: true });
+      } catch (_) {}
     }, finishMs + 50);
   }
 
-  if (name === 'admin') renderAdminPanel();
+  if (name === "admin") renderAdminPanel();
 }
 
 function chairPosition(cx, cy, seat, total) {
-  const angle = ((seat - 1) / total) * 360 - 90;
-  const rad = (angle * Math.PI) / 180;
-  return {
-    x: cx + CHAIR_ORBIT * Math.cos(rad),
-    y: cy + CHAIR_ORBIT * Math.sin(rad),
-  };
+  const tableWidth = 84;
+  const tableHeight = 52;
+
+  const left = cx - tableWidth / 2;
+  const right = cx + tableWidth / 2;
+
+  const top = cy - tableHeight / 2;
+  const bottom = cy + tableHeight / 2;
+
+  const offset = 18;
+
+  switch (seat) {
+    case 1:
+      return {
+        x: left + tableWidth * 0.25,
+        y: top - offset,
+      };
+
+    case 2:
+      return {
+        x: left + tableWidth * 0.75,
+        y: top - offset,
+      };
+
+    case 3:
+      return {
+        x: right + offset,
+        y: cy,
+      };
+
+    case 4:
+      return {
+        x: left + tableWidth * 0.75,
+        y: bottom + offset,
+      };
+
+    case 5:
+      return {
+        x: left + tableWidth * 0.25,
+        y: bottom + offset,
+      };
+
+    case 6:
+      return {
+        x: left - offset,
+        y: cy,
+      };
+
+    default:
+      return { x: cx, y: cy };
+  }
 }
 
 function buildChairsSvg(cx, cy, tableNum, highlightSeat) {
   const total = CONFIG.SEATS_PER_TABLE;
   const hlSeat = Number(highlightSeat);
   const hlTable = Number(selectedGuest?.table);
-  let svg = '';
+  let svg = "";
   for (let seat = 1; seat <= total; seat++) {
     const { x, y } = chairPosition(cx, cy, seat, total);
     const isHl = hlSeat === seat && hlTable === tableNum;
     svg += `
-      <g class="svg-chair-wrap${isHl ? ' svg-chair-wrap--highlight' : ''}" data-seat="${seat}">
-        <circle class="svg-chair${isHl ? ' svg-chair--highlight' : ''}" cx="${x}" cy="${y}" r="${CHAIR_RADIUS}" />
+      <g class="svg-chair-wrap${isHl ? " svg-chair-wrap--highlight" : ""}" data-seat="${seat}">
+        <circle class="svg-chair${isHl ? " svg-chair--highlight" : ""}" cx="${x}" cy="${y}" r="${CHAIR_RADIUS}" />
       </g>
     `;
   }
@@ -377,18 +427,77 @@ function buildHeadTableSvg() {
 function buildRoundTableSvg(tableNum, highlightTable, highlightSeat) {
   const { cx, cy } = TABLE_LAYOUT[tableNum];
   const isHl = Number(highlightTable) === tableNum;
-  const hlClass = isHl ? ' svg-table--highlight' : '';
+  const hlClass = isHl ? " svg-table--highlight" : "";
   const r = TABLE_RADIUS;
 
+  const rotation =
+    {
+      1: -18,
+      2: 18,
+      3: -18,
+      4: 18,
+    }[tableNum] || 0;
+
+  const width = 100;
+  const height = 52;
+
+  const x = cx - width / 2;
+  const y = cy - height / 2;
+
   return `
-    <g class="svg-table-group svg-table-group--${tableNum}">
+    <g
+    class="svg-table-group svg-table-group--${tableNum}"
+    transform="rotate(${rotation} ${cx} ${cy})"
+>
       <g class="svg-table svg-table--${tableNum}${hlClass}" data-table="${tableNum}">
         ${buildChairsSvg(cx, cy, tableNum, highlightSeat)}
-        <ellipse class="svg-table__shadow" cx="${cx}" cy="${cy + 4}" rx="${r + 2}" ry="${r}" />
-        <circle class="svg-table__top" cx="${cx}" cy="${cy}" r="${r}" />
-        <circle class="svg-table__rim" cx="${cx}" cy="${cy}" r="${r}" fill="none" />
-        <text class="svg-table__number" x="${cx}" y="${cy + 1}" text-anchor="middle" dominant-baseline="middle">${tableNum}</text>
-        <circle class="svg-table__hit" cx="${cx}" cy="${cy}" r="${r + 18}" aria-hidden="true" />
+        <rect
+    class="svg-table__shadow"
+    x="${x + 2}"
+    y="${y + 4}"
+    width="${width}"
+    height="${height}"
+    rx="14"
+/>
+
+<rect
+    class="svg-table__top"
+    x="${x}"
+    y="${y}"
+    width="${width}"
+    height="${height}"
+    rx="14"
+/>
+
+<rect
+    class="svg-table__rim"
+    x="${x}"
+    y="${y}"
+    width="${width}"
+    height="${height}"
+    rx="14"
+    fill="none"
+/>
+
+<text
+    class="svg-table__number"
+    x="${cx}"
+    y="${cy + 1}"
+    text-anchor="middle"
+    dominant-baseline="middle"
+>
+    ${tableNum}
+</text>
+
+<rect
+    class="svg-table__hit"
+    x="${x - 12}"
+    y="${y - 12}"
+    width="${width + 24}"
+    height="${height + 24}"
+    rx="18"
+    aria-hidden="true"
+/>
       </g>
     </g>
   `;
@@ -431,15 +540,15 @@ function renderHallMap() {
 
 function bindHallMapClicks() {
   if (hallMap.dataset.clicksBound) return;
-  hallMap.dataset.clicksBound = '1';
+  hallMap.dataset.clicksBound = "1";
 
-  hallMap.addEventListener('click', (e) => {
-    const tableEl = e.target.closest('.svg-table[data-table]');
+  hallMap.addEventListener("click", (e) => {
+    const tableEl = e.target.closest(".svg-table[data-table]");
     if (!tableEl) return;
 
     const table = tableEl.dataset.table;
     haptic(8);
-    if (table === 'head') openHeadTableModal();
+    if (table === "head") openHeadTableModal();
     else openTableModal(parseInt(table, 10));
   });
 }
@@ -448,30 +557,32 @@ function playGuestMapReveal(guest, scrollPage = true) {
   if (!guest) return;
 
   if (scrollPage && !prefersReducedMotion()) {
-    hallMap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    hallMap.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
-  const tableEl = hallMap.querySelector(`.svg-table[data-table="${guest.table}"]`);
+  const tableEl = hallMap.querySelector(
+    `.svg-table[data-table="${guest.table}"]`,
+  );
   if (!tableEl) return;
 
-  tableEl.classList.remove('svg-table--reveal');
+  tableEl.classList.remove("svg-table--reveal");
   void tableEl.offsetWidth;
-  tableEl.classList.add('svg-table--reveal');
+  tableEl.classList.add("svg-table--reveal");
 
   if (prefersReducedMotion()) return;
 
   setTimeout(() => {
-    const chair = hallMap.querySelector('.svg-chair-wrap--highlight');
+    const chair = hallMap.querySelector(".svg-chair-wrap--highlight");
     if (chair) {
-      chair.classList.remove('svg-chair--reveal');
+      chair.classList.remove("svg-chair--reveal");
       void chair.offsetWidth;
-      chair.classList.add('svg-chair--reveal');
+      chair.classList.add("svg-chair--reveal");
     }
   }, 320);
 }
 
 function openHeadTableModal() {
-  modalTitle.textContent = 'Стол молодожёнов';
+  modalTitle.textContent = "Стол молодожёнов";
   modalScene.innerHTML = `
     <div class="head-modal">
       <div class="head-modal__badge">
@@ -481,16 +592,16 @@ function openHeadTableModal() {
       <p class="head-modal__text">Главный стол торжества</p>
     </div>
   `;
-  modalScene.classList.add('modal-scene--head');
+  modalScene.classList.add("modal-scene--head");
   tableModal.hidden = false;
   updateBodyScroll();
 }
 
 function openTableModal(tableNum, highlightName) {
-  modalScene.classList.remove('modal-scene--head');
+  modalScene.classList.remove("modal-scene--head");
   const guests = groupByTable()[tableNum] || [];
   const name = highlightName || selectedGuest?.name;
-  const colors = ['--t1', '--t2', '--t3', '--t4', '--t5'];
+  const colors = ["--t1", "--t2", "--t3", "--t4", "--t5"];
 
   modalTitle.textContent = `Стол ${tableNum}`;
   modalScene.innerHTML = `
@@ -505,15 +616,15 @@ function openTableModal(tableNum, highlightName) {
     const angle = i * step - 90;
     const { first, last } = splitName(guest.name);
     const isHighlight = name && guest.name === name;
-    const el = document.createElement('div');
-    el.className = `modal-guest${isHighlight ? ' modal-guest--highlight' : ''}`;
-    el.style.setProperty('--angle', `${angle}deg`);
-    el.style.setProperty('--delay', `${i * 0.06}s`);
+    const el = document.createElement("div");
+    el.className = `modal-guest${isHighlight ? " modal-guest--highlight" : ""}`;
+    el.style.setProperty("--angle", `${angle}deg`);
+    el.style.setProperty("--delay", `${i * 0.06}s`);
     el.innerHTML = `
       <div class="modal-guest__avatar">${escapeHtml(getInitials(guest.name))}</div>
       <div class="modal-guest__name">
         <span class="modal-guest__name-first">${escapeHtml(first)}</span>
-        ${last ? `<span class="modal-guest__name-last">${escapeHtml(last)}</span>` : ''}
+        ${last ? `<span class="modal-guest__name-last">${escapeHtml(last)}</span>` : ""}
       </div>
     `;
     modalScene.appendChild(el);
@@ -525,31 +636,31 @@ function openTableModal(tableNum, highlightName) {
 
 function closeTableModal() {
   tableModal.hidden = true;
-  modalScene.classList.remove('modal-scene--head');
+  modalScene.classList.remove("modal-scene--head");
   updateBodyScroll();
 }
 
 function refreshAfterDataChange() {
   selectedGuest = null;
-  searchInput.value = '';
-  suggestionsEl.innerHTML = '';
+  searchInput.value = "";
+  suggestionsEl.innerHTML = "";
   lastSearchResults = [];
   suggestionFocusIndex = -1;
   guestCard.hidden = true;
   guestReveal.hidden = true;
   searchEmpty.hidden = true;
   hallMapRendered = false;
-  if (currentScreen === 'map') ensureHallMap();
+  if (currentScreen === "map") ensureHallMap();
 }
 
 function createPetals() {
   if (petalsCreated || prefersReducedMotion()) return;
   petalsCreated = true;
-  const count = window.matchMedia('(max-width: 480px)').matches ? 5 : 8;
+  const count = window.matchMedia("(max-width: 480px)").matches ? 5 : 8;
   const frag = document.createDocumentFragment();
   for (let i = 0; i < count; i++) {
-    const petal = document.createElement('span');
-    petal.className = 'petal';
+    const petal = document.createElement("span");
+    petal.className = "petal";
     petal.style.left = `${Math.random() * 100}%`;
     petal.style.animationDuration = `${9 + Math.random() * 7}s`;
     petal.style.animationDelay = `${Math.random() * 8}s`;
@@ -558,31 +669,35 @@ function createPetals() {
   petalsContainer.appendChild(frag);
 }
 
-btnStart.addEventListener('click', () => {
+btnStart.addEventListener("click", () => {
   haptic(8);
-  showScreen('map');
+  showScreen("map");
 });
 
-btnBackWelcome.addEventListener('click', () => showScreen('welcome'));
+btnBackWelcome.addEventListener("click", () => showScreen("welcome"));
 
-searchInput.addEventListener('input', handleSearchInput);
+searchInput.addEventListener("input", handleSearchInput);
 
-searchInput.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowDown' && lastSearchResults.length) {
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowDown" && lastSearchResults.length) {
     e.preventDefault();
     setSuggestionFocus(suggestionFocusIndex + 1);
     return;
   }
-  if (e.key === 'ArrowUp' && lastSearchResults.length) {
+  if (e.key === "ArrowUp" && lastSearchResults.length) {
     e.preventDefault();
-    setSuggestionFocus(suggestionFocusIndex <= 0 ? lastSearchResults.length - 1 : suggestionFocusIndex - 1);
+    setSuggestionFocus(
+      suggestionFocusIndex <= 0
+        ? lastSearchResults.length - 1
+        : suggestionFocusIndex - 1,
+    );
     return;
   }
-  if (e.key === 'Escape') {
+  if (e.key === "Escape") {
     clearSuggestionFocus();
     return;
   }
-  if (e.key === 'Enter') {
+  if (e.key === "Enter") {
     e.preventDefault();
     if (suggestionFocusIndex >= 0 && lastSearchResults[suggestionFocusIndex]) {
       selectGuest(lastSearchResults[suggestionFocusIndex]);
@@ -593,32 +708,32 @@ searchInput.addEventListener('keydown', (e) => {
   }
 });
 
-modalBackdrop.addEventListener('click', closeTableModal);
-modalClose.addEventListener('click', closeTableModal);
+modalBackdrop.addEventListener("click", closeTableModal);
+modalClose.addEventListener("click", closeTableModal);
 
 function loadAdminScript() {
   return new Promise((resolve, reject) => {
-    if (document.querySelector('script[data-admin]')) {
+    if (document.querySelector("script[data-admin]")) {
       resolve();
       return;
     }
-    const s = document.createElement('script');
-    s.src = 'admin.js';
-    s.dataset.admin = '1';
+    const s = document.createElement("script");
+    s.src = "admin.js";
+    s.dataset.admin = "1";
     s.onload = () => resolve();
-    s.onerror = () => reject(new Error('admin.js'));
+    s.onerror = () => reject(new Error("admin.js"));
     document.body.appendChild(s);
   });
 }
 
-document.addEventListener('keydown', (e) => {
-  if (e.key !== 'Escape') return;
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
   if (!tableModal.hidden) closeTableModal();
   else if (!guestFormModal.hidden) closeGuestForm?.();
 });
 
 function scheduleIdleWork(fn) {
-  if ('requestIdleCallback' in window) {
+  if ("requestIdleCallback" in window) {
     requestIdleCallback(fn, { timeout: 1500 });
   } else {
     setTimeout(fn, 1);
@@ -629,19 +744,19 @@ async function initApp() {
   try {
     await loadGuests();
   } catch (_) {
-    if (typeof GUESTS_LIST !== 'undefined') setGuestsFromList(GUESTS_LIST);
+    if (typeof GUESTS_LIST !== "undefined") setGuestsFromList(GUESTS_LIST);
   }
 
   hideLoader();
   scheduleIdleWork(createPetals);
 
-  if (new URLSearchParams(location.search).get('admin') === '1') {
+  if (new URLSearchParams(location.search).get("admin") === "1") {
     try {
       await loadAdminScript();
-      if (isAdminLoggedIn()) showScreen('admin');
-      else showScreen('adminLogin');
+      if (isAdminLoggedIn()) showScreen("admin");
+      else showScreen("adminLogin");
     } catch {
-      console.error('Не удалось загрузить admin.js');
+      console.error("Не удалось загрузить admin.js");
     }
   }
 }
